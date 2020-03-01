@@ -1,4 +1,4 @@
-# docker pull docker.pkg.github.com/solvaholic/expert-octo-giggle/actions-runner:latest
+# docker pull docker.pkg.github.com/solvaholic/docker/actions-runner:latest
 
 FROM debian:stretch-slim
 
@@ -28,14 +28,14 @@ USER runner
 
 # COPY --chown=runner:runner actions-runner-linux-x64-2.165.2.tar.gz ./
 
-# Visit the repo and add a self-hosted runner. Additional steps are provided
+# Visit your repo and add a self-hosted runner. Additional steps are provided
 # on the web site. For example:
 #   https://github.com/OWNER/REPO/settings/actions
 
 # _token=YOURTOKENHERE
 # _name=actions-runner
-# _url=https://github.com/solvaholic/expert-octo-giggle
-# _tag=docker.pkg.github.com/solvaholic/expert-octo-giggle/actions-runner:latest
+# _url=https://github.com/OWNER/REPO
+# _tag=docker.pkg.github.com/solvaholic/docker/actions-runner:latest
 #
 # docker login docker.pkg.github.com
 # docker pull ${_tag}
