@@ -25,11 +25,11 @@ jobs:
 
       - name: Build image(s)
         run: |
-          echo "DEBUG: _files is ..." && cat _files
+          echo "::debug::_files is ..." && cat _files
           : > _images
           cat _files | while read _thisfile; do
             _appname=${_thisfile%%/*} _filename=${_thisfile##*/}
-            echo "DEBUG: _thisfile, _appname are ..." && echo "${_thisfile} ${_appname}"
+            echo "::debug::_thisfile, _appname are ..." && echo "${_thisfile} ${_appname}"
             if [ -f ${_thisfile} ]; then
               _tag=docker.pkg.github.com/${{ github.repository }}/${_appname}:latest
               cat ${_thisfile} | docker build -t ${_tag} -
@@ -43,8 +43,8 @@ jobs:
 
       - name: Push image(s)
         run: |
-          echo "DEBUG: _images is ..." && cat _images
+          echo "::debug::_images is ..." && cat _images
           cat _images | while read _thisimage; do
-            echo "DEBUG: Pushing ${_thisimage}"
+            echo "::debug::Pushing ${_thisimage}"
             docker push ${_thisimage}
           done
