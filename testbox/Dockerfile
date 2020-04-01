@@ -1,4 +1,5 @@
 # docker pull solvaholic/testbox:latest
+# .
 
 # Use debian:9 because GitHub's workflow runners cache it.
 FROM debian:9
