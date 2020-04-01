@@ -47,6 +47,7 @@ jobs:
           -u ${{ github.actor }} --password-stdin
           echo "::debug::_images is ..." && cat _images
           cat _images | while read -r _thisimage; do
+            # For GitHub's registry, prepend docker.pkg.github.com
             _mytag="docker.pkg.github.com/${_thisimage}"
             docker tag "${_thisimage}" "${_mytag}"
             echo "::debug::Pushing ${_mytag}"
@@ -57,10 +58,10 @@ jobs:
         run: |
           echo "${{ secrets.dockerhub_token }}" | \
           docker login -u ${{ github.actor }} --password-stdin
-          -u ${{ github.actor }} --password-stdin
           echo "::debug::_images is ..." && cat _images
           cat _images | while read -r _thisimage; do
-            _mytag="${_thisimage}"
+            # For Docker hub, use only the owner and topic names.
+            _mytag="${_thisimage%%/*}/${_thisimage##*/}"
             docker tag "${_thisimage}" "${_mytag}"
             echo "::debug::Pushing ${_mytag}"
             docker push "${_mytag}"
