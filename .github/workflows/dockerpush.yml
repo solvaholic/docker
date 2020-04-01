@@ -20,31 +20,48 @@ jobs:
 
       - name: List changed Dockerfiles
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | \
+          git diff --name-only ${{ github.event.before }} \
+          ${{ github.event.after }} | \
           sed -n -e "/\/Dockerfile$/p" > _files
 
       - name: Build image(s)
         run: |
           echo "::debug::_files is ..." && cat _files
           : > _images
-          cat _files | while read _thisfile; do
-            _appname=${_thisfile%%/*} _filename=${_thisfile##*/}
-            echo "::debug::_thisfile, _appname are ..." && echo "${_thisfile} ${_appname}"
-            if [ -f ${_thisfile} ]; then
-              _tag=docker.pkg.github.com/${{ github.repository }}/${_appname}:latest
-              cat ${_thisfile} | docker build -t ${_tag} -
-              echo ${_tag} >> _images
+          cat _files | while read -r _thisfile; do
+            _appname="${_thisfile%%/*}" _filename="${_thisfile##*/}"
+            echo "::debug::_thisfile, _appname are ..." && \
+            echo "${_thisfile} ${_appname}"
+            if [ -f "${_thisfile}" ]; then
+              _tag=${{ github.repository }}/"${_appname}:"latest
+              cat "${_thisfile}" | docker build -t "${_tag}" -
+              echo "${_tag}" >> _images
             fi
           done
           echo "::set-env name=_images::${_myImages}"
 
-      - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-
-      - name: Push image(s)
+      - name: Push image(s) to docker.pkg.github.com
         run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+          docker login docker.pkg.github.com \
+          -u ${{ github.actor }} --password-stdin
           echo "::debug::_images is ..." && cat _images
-          cat _images | while read _thisimage; do
-            echo "::debug::Pushing ${_thisimage}"
-            docker push ${_thisimage}
+          cat _images | while read -r _thisimage; do
+            _mytag="docker.pkg.github.com/${_thisimage}"
+            docker tag "${_thisimage}" "${_mytag}"
+            echo "::debug::Pushing ${_mytag}"
+            docker push "${_mytag}"
+          done
+
+      - name: Push image(s) to Docker hub
+        run: |
+          echo "${{ secrets.dockerhub_token }}" | \
+          docker login -u ${{ github.actor }} --password-stdin
+          -u ${{ github.actor }} --password-stdin
+          echo "::debug::_images is ..." && cat _images
+          cat _images | while read -r _thisimage; do
+            _mytag="${_thisimage}"
+            docker tag "${_thisimage}" "${_mytag}"
+            echo "::debug::Pushing ${_mytag}"
+            docker push "${_mytag}"
           done
