@@ -13,7 +13,7 @@
 FROM debian:9
 
 COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c"]
 
 # NOTE: Removing a package from this list :point_down: will be a breaking
 #       change. Before you head down that path, start versioning this image.
@@ -32,9 +32,10 @@ yamllint
 # TODO: Since that :point_up: effectively makes any project using this image
 #       dependent on those packages, find a more reliable way to manage this.
 
-CMD ["/bin/bash"]
 # Build and set locale, so text encoding and decoding can work reliably.
 RUN echo en_US.UTF-8\ UTF-8 > /etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+
+CMD ["/entrypoint.sh"]
