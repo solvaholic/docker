@@ -1,9 +1,11 @@
+# Usage example:
 # docker pull solvaholic/testbox:latest
+# docker run -t --rm -v $(realpath .):/myrepo:ro solvaholic/testbox:latest
 
 #
 # Hi there future reader! @solvaholic put this Docker image together in an
 # attempt to find a way 'round (spending time) installing yamllint and other
-# packages every test run, from a GitHub Actions workflow.
+# packages every test run, on a GitHub Actions workflow runner.
 #
 # If you have any feedback at all, please share it!
 # https://github.com/solvaholic/docker/issues/new/choose
