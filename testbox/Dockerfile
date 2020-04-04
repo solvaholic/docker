@@ -1,7 +1,7 @@
+#
 # Usage example:
-# docker pull solvaholic/testbox:latest
 # docker run -t --rm -v $(realpath .):/myrepo:ro solvaholic/testbox:latest
-# ....
+#
 
 #
 # Hi there future reader! @solvaholic put this Docker image together in an
@@ -15,6 +15,7 @@
 # Use debian:9 because GitHub's workflow runners cache it.
 FROM debian:9
 
+# Set ENTRYPOINT and CMD to run /entrypoint.sh by default.
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c"]
 
