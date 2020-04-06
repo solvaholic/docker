@@ -27,11 +27,15 @@ RUN apt update && apt install -y \
 curl \
 git \
 locales \
+man \
 nvi \
 python3-pkg-resources \
 shellcheck \
 tmux \
 yamllint
+
+ADD https://github.com/cli/cli/releases/download/v0.6.4/gh_0.6.4_linux_amd64.deb /
+RUN dpkg -i ./gh_*.deb
 
 # TODO: Since that :point_up: effectively makes any project using this image
 #       dependent on those packages, find a more reliable way to manage this.
