@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Script for use in a solvaholic/testbox Docker container.
+#
+# Usage: /usr/local/bin/solv-git-hints
+#
+# Print each line from this file, beginning with the first blank line.
+sed -n '/^$/,/$d/p' "${0}" || exit
+exit
+
+=== GIT HINTS ===
+
+# Configure Git client for all users.
+
+    solv-ssh-client --all
+
+# Configure Git client to sign commits.
+
+    TODO: Configure Git client to sign commits.
+
+# Walkthrough.
+
+    git clone git@github.com:solvaholic/docker.git
+    cd docker
+    git checkout -b mychanges           # Create a branch to work in.
+    echo "Hello World" >> README.md     # Make some changes.
+    git add README.md                   # Stage your changes.
+    git commit -m "Updated README"      # Commit your changes.
+    git push -u origin mychanges        # Push your branch to the server.
+ 
+ 

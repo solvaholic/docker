@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Configure the logged-in user's Git client.
+#
+# Usage examples:
+#
+#   # Run for only the current user:
+#   /usr/local/bin/solv-git
+#
+#   # Run, as root, for each user:
+#   /usr/local/bin/solv-git --all
+#
+
+if [ "${1}" = "--all" ]; then
+  for i in root $(ls /home); do
+    sudo -iu $i -- /usr/local/bin/solv-git
+  done
+else
+  echo " "
+  echo "INFO: Run solv-git-client for user $(id -un)."
+  git config --global user.name "$(id -un)"
+  git config --global user.email "$(id -un)@$(hostname)"
+fi
+echo " "

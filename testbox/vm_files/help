@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Script for use in a solvaholic/testbox Docker container.
+#
+# Usage: /help
+#
+#
+# Print each line from this file, beginning with the first blank line.
+sed -n '/^$/,/$d/p' "${0}" || exit
+exit
+
+=== HELP ===
+
+solvaholic/testbox is a general purpose Docker image. Use it to create
+ephemeral workspaces for testing changes or reproducing issues.
+
+Add things you'll use often. When deciding whether and how to add something,
+consider the impact it'll have on image size, build time, and dependencies.
+
+Usage examples:
+
+    # Print the output you're seeing now :mind-blown:.
+    docker run -it --rm solvaholic/testbox /help
+
+    # Recall some hints.
+    docker run -it --rm solvaholic/testbox /hints
+
+    # List available setup scripts.
+    docker run -it --rm solvaholic/testbox /solv
+
+    # Run ./script/test in the current checkout.
+    docker run -it --rm -v "$(realpath .)":/myrepo:ro solvaholic/testbox
+
+    # Get a shell, or run a command, in the container.
+    docker run -it --rm solvaholic/testbox /bin/bash
+ 
+ 

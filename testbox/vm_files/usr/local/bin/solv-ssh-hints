@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Script for use in a solvaholic/testbox Docker container.
+#
+# Usage: /usr/local/bin/solv-ssh-hints
+#
+# Print each line from this file, beginning with the first blank line.
+sed -n '/^$/,/$d/p' "${0}" || exit
+exit
+
+=== SSH HINTS ===
+
+# Helpful references.
+
+    - https://mwl.io/nonfiction/tools#ssh
+    - https://man.openbsd.org/sshd.8
+    - https://github.blog/2019-08-14-ssh-certificate-authentication-for-github-enterprise-cloud/
+    - https://www.openbsd.org/donations.html
+
+# Configure SSH server.
+
+    solv-ssh-server
+
+# Configure SSH client for each user (run as root).
+
+    solv-ssh-client --all
+
+# Make a SSH CA key (run as root).
+
+    ssh-keygen -t ed25519 -C "ca@$(hostname)" -N "" -f /root/.ssh/ca
+
+# DO NOT TRUST THAT CA KEY.
+
+    Do not. Don't.
+
+    Don't trust this Docker container to authenticate users for anything
+    sensitive or dangerous.
+
+    But, like, if you do something stupid and fun things happen, please
+    let folks know:
+    
+    https://github.com/solvaholic/docker/issues/new
+
+# Configure `sshd` to trust the CA key.
+
+    echo "TrustedUserCAKeys /etc/ssh/user-ca-keys.pub" >> /etc/ssh/sshd_config
+    cat /root/.ssh/ca.pub >> /etc/ssh/user-ca-keys.pub
+    service ssh --full-restart
+
+# Sign the user's public key, with the CA's key.
+
+    _github_user=user1
+    _local_user=user1
+    ssh-keygen \
+      -O extension:login@github.com=$_github_user \
+      -s /root/.ssh/ca \
+      -V '+1d' \
+      -I $_local_user@$(hostname) \
+      -n $_github_user \
+      ~$_local_user/.ssh/id_ed25519.pub
+ 
+# Switch to the user and authenticate with their certificate.
+
+    su - user1
+    ssh -i ~/.ssh/id_ed25519 user1@localhost
+
+
+ 
+ 

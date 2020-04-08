@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Configure SSH client for the currently logged in user.
+#
+# Usage examples:
+#
+#   # Run for only the current user:
+#   /usr/local/bin/solv-ssh-client
+#
+#   # Run, as root, for each user:
+#   /usr/local/bin/solv-ssh-client --all
+#
+
+if [ "${1}" = "--all" ]; then
+  for i in root $(ls /home); do
+    sudo -iu $i -- /usr/local/bin/solv-ssh-client
+  done
+else
+  echo " "
+  echo "INFO: Run solv-ssh-client for user $(id -un)."
+  ssh-keygen -t ed25519 -C "$(hostname)" -N "" -f ~/.ssh/id_ed25519
+fi
+echo " "

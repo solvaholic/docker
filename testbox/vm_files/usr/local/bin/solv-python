@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Configure the logged-in user's Git client.
+#
+# Usage: /usr/local/bin/solv-python
+#
+
+echo " "
+echo "INFO: Must run as root."
+
+[ "$(id -u)" = "0" ] || exit
+
+apt install -y python3-pip
+python3 -m pip install --upgrade \
+  pip \
+  setuptools \
+  virtualenv \
+  wheel
+
+echo " "
+echo "INFO: All set. Now you can pip install all the things."

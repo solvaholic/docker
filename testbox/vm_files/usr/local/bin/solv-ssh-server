@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Configure SSH server.
+#
+# Usage: /usr/local/bin/solv-ssh-server
+#
+
+# Use OpenSSH 7.6 or later, to get extension support.
+# See also https://www.openssh.com/txt/release-7.6
+
+echo " "
+echo "INFO: Must run as root."
+
+[ "$(id -u)" = "0" ] || exit
+
+apt install -y openssh-server
