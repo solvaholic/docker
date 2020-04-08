@@ -12,12 +12,12 @@
 # https://github.com/solvaholic/docker/issues/new/choose
 #
 
-# Use debian:9 because GitHub's workflow runners cache it.
-FROM debian:9
+# Use debian:buster to get OpenSSH 7.9p1.
+FROM debian:buster
 
 # Set ENTRYPOINT and CMD to run /entrypoint.sh by default.
 COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/bin/bash", "-c"]
+ENTRYPOINT ["/bin/bash", "-c", "--"]
 
 # NOTE: Removing a package from this list :point_down: will be a breaking
 #       change. Before you head down that path, start versioning this image.
@@ -31,14 +31,27 @@ man \
 nvi \
 python3-pkg-resources \
 shellcheck \
+sudo \
 tmux \
 yamllint
+
+# TODO: Since that :point_up: effectively makes any project using this image
+#       dependent on those packages, find a more reliable way to manage this.
 
 ADD https://github.com/cli/cli/releases/download/v0.6.4/gh_0.6.4_linux_amd64.deb /
 RUN dpkg -i ./gh_*.deb
 
-# TODO: Since that :point_up: effectively makes any project using this image
-#       dependent on those packages, find a more reliable way to manage this.
+# Configure Git client for root user.
+RUN git config --global user.name root; \
+    git config --global user.email root@localhost
+
+# Add a couple non-root user accounts.
+RUN useradd -c "" -m -p "" -s /bin/bash user1; \
+    useradd -c "" -m -p "" -s /bin/bash user2; \
+    useradd -c "" -m -p "" -s /bin/bash user3;
+
+# Add helpful scripts.
+ADD vm_files /
 
 # Build and set locale, so text encoding and decoding can work reliably.
 RUN echo en_US.UTF-8\ UTF-8 > /etc/locale.gen && locale-gen
