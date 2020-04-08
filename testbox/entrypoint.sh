@@ -4,7 +4,7 @@
 
 # Requirements:
 #   - /github/workspace or /myrepo contains a clone of the repository to test
-#   - If you pass GITHUB_TOKEN and GITHUB_USER, gh will use them.
+#   - If GITHUB_TOKEN and GITHUB_USER are set, gh will use them.
 
 # If /github/workspace is not a Git repository, try /myrepo. If that's not,
 # either, then fail.
@@ -22,6 +22,8 @@ echo "INFO: Found a Git repository in ${_myrepo}."
 # If there's not already a gh config, and if GITHUB_USER and GITHUB_TOKEN are
 # set, configure gh credentials.
 _ghcfg=~/.config/gh/config.yml
+[ -z "${GITHUB_TOKEN}" ] && GITHUB_TOKEN="${INPUT_GITHUB_TOKEN:-""}"
+[ -z "${GITHUB_USER}" ] && GITHUB_USER="${INPUT_GITHUB_USER:-""}"
 if [ ! -f "${_ghcfg}" ] && [ -n "${GITHUB_USER}" ] && [ -n "${GITHUB_TOKEN}" ]
 then
   echo "INFO: GITHUB_USER is set to '${GITHUB_USER}'."
