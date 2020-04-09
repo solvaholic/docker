@@ -26,7 +26,8 @@
 FROM debian:buster AS donor
 RUN apt update && apt install -y locales
 
-# Build and set locale; Copy /usr/lib/locale/en_US.UTF-8 to desired target.
+# Build and set locale.
+# (Copy /usr/lib/locale/en_US.UTF-8 to desired target.)
 RUN cp /usr/share/i18n/charmaps/UTF-8.gz /tmp && \
     cd /tmp && rm -rf /tmp/UTF-8 && \
     gzip -d UTF-8.gz && \
@@ -63,21 +64,16 @@ yamllint
 # TODO: Since that :point_up: effectively makes any project using this image
 #       dependent on those packages, find a more reliable way to manage this.
 
+# Install gh.
 ADD https://github.com/cli/cli/releases/download/v0.6.4/gh_0.6.4_linux_amd64.deb /
-RUN dpkg -i ./gh_*.deb
-
-# Configure Git client for root user.
-RUN git config --global user.name root; \
-    git config --global user.email root@localhost
+RUN dpkg -i ./gh_*.deb && rm -f ./gh_*.deb
 
 # Add a couple non-root user accounts.
 RUN useradd -c "" -m -p "" -s /bin/bash user1; \
     useradd -c "" -m -p "" -s /bin/bash user2; \
     useradd -c "" -m -p "" -s /bin/bash user3;
 
-# Build and set locale, so text encoding and decoding can work reliably.
-# Copy these from the donor image:
-#   /usr/lib/locale/en_US.UTF-8
+# Set locale, so text encoding and decoding can work reliably.
 RUN mkdir -p /usr/lib/locale/en_US.UTF-8
 COPY --from=donor /usr/lib/locale/en_US.UTF-8 /usr/lib/locale/en_US.UTF-8/
 ENV LANG en_US.UTF-8
