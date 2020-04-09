@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - '*/Dockerfile'
+      - '.github/workflows/dockerpush.yml'
 
 jobs:
   # Build and push any Dockerfile changed in this push.
@@ -16,6 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: ${{ github.event.after }}
           fetch-depth: '2'
 
       - name: List changed Dockerfiles

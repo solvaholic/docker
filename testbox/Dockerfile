@@ -1,6 +1,14 @@
 #
-# Usage example:
-# docker run -t --rm -v $(realpath .):/myrepo:ro solvaholic/testbox:latest
+# Usage examples:
+#
+#   # Run ./script/test on the current checkout.
+#   docker run -t --rm -v $(realpath .):/myrepo:ro solvaholic/testbox:latest
+#
+#   # Get a disposable shell.
+#   docker run -t --rm solvaholic/testbox:latest /bin/bash
+#
+#   # Learn more about this image.
+#   docker run -t --rm solvaholic/testbox:latest /help
 #
 
 #
@@ -12,12 +20,13 @@
 # https://github.com/solvaholic/docker/issues/new/choose
 #
 
-# Use debian:buster to get OpenSSH 7.9p1.
+# Use debian:buster, to get OpenSSH 7.9p1.
 FROM debian:buster
 
 # Set ENTRYPOINT and CMD to run /entrypoint.sh by default.
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "--"]
+CMD ["/entrypoint.sh"]
 
 # NOTE: Removing a package from this list :point_down: will be a breaking
 #       change. Before you head down that path, start versioning this image.
@@ -58,5 +67,3 @@ RUN echo en_US.UTF-8\ UTF-8 > /etc/locale.gen && locale-gen
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-
-CMD ["/entrypoint.sh"]
