@@ -21,7 +21,24 @@
 #
 
 # Use debian:buster, to get OpenSSH 7.9p1.
-FROM debian:buster
+
+# Build donor image, to copy some things over rather than install in-place.
+FROM debian:buster AS donor
+RUN apt update && apt install -y locales
+
+# Build and set locale; Copy /usr/lib/locale/en_US.UTF-8 to desired target.
+RUN cp /usr/share/i18n/charmaps/UTF-8.gz /tmp && \
+    cd /tmp && rm -rf /tmp/UTF-8 && \
+    gzip -d UTF-8.gz && \
+    localedef -f /tmp/UTF-8 -i /usr/share/i18n/locales/en_US \
+    /usr/lib/locale/en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+
+# Build testbox image.
+FROM debian:buster AS testbox
 
 # Set ENTRYPOINT and CMD to run /entrypoint.sh by default.
 COPY entrypoint.sh /entrypoint.sh
@@ -35,7 +52,6 @@ CMD ["/entrypoint.sh"]
 RUN apt update && apt install -y \
 curl \
 git \
-locales \
 man \
 nvi \
 python3-pkg-resources \
@@ -59,11 +75,14 @@ RUN useradd -c "" -m -p "" -s /bin/bash user1; \
     useradd -c "" -m -p "" -s /bin/bash user2; \
     useradd -c "" -m -p "" -s /bin/bash user3;
 
-# Add helpful scripts.
-ADD vm_files /
-
 # Build and set locale, so text encoding and decoding can work reliably.
-RUN echo en_US.UTF-8\ UTF-8 > /etc/locale.gen && locale-gen
+# Copy these from the donor image:
+#   /usr/lib/locale/en_US.UTF-8
+RUN mkdir -p /usr/lib/locale/en_US.UTF-8
+COPY --from=donor /usr/lib/locale/en_US.UTF-8 /usr/lib/locale/en_US.UTF-8/
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+
+# Add helpful scripts.
+ADD vm_files /
