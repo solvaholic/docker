@@ -6,30 +6,31 @@
 #
 #
 # Print each line from this file, beginning with the first blank line.
-sed -n '/^$/,/$d/p' "${0}" || exit
+sed -n 's/^### //p' "${0}" || exit
 exit
 
-=== HINTS ===
-
-# Create a regular user.
-
-    useradd -c "" -m -p "" -s /bin/bash USERNAME
-
-# Run a command as another user.
-
-    sudo -iu USERNAME -- COMMAND
-
-# Become another user.
-
-    su - USERNAME
-
-# Configure the logged-in user's Git client.
-
-    /usr/local/bin/solv-git
-
-# Display topical hints.
-
-    /usr/local/bin/solv-git-hints
-    /usr/local/bin/solv-ssh-hints
- 
- 
+### 
+### === HINTS ===
+### 
+### # Create a regular user.
+### 
+###     useradd -c "" -m -p "" -s /bin/bash USERNAME
+### 
+### # Run a command as another user.
+### 
+###     sudo -iu USERNAME -- COMMAND
+### 
+### # Become another user.
+### 
+###     su - USERNAME
+### 
+### # Configure the logged-in user's Git client.
+### 
+###     /usr/local/bin/solv-git
+### 
+### # Display topical hints.
+### 
+###     /usr/local/bin/solv-git-hints
+###     /usr/local/bin/solv-ssh-hints
+###  
+### 

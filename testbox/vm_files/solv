@@ -6,27 +6,29 @@
 #
 #
 # Print each line from this file, beginning with the first blank line.
-sed -n '/^$/,/$d/p' "${0}" || exit
+sed -n 's/^### //p' "${0}" || exit
 exit
 
-=== SOLV ===
-
-Got a problem? Put some solvahol on it!
-
-Run these scripts to bootstrap common configurations.
-
-# Git
-
-    solv-git          : Configure the logged-in user's Git client.
- 
-# Python
-
-    solv-python       : Install and upgrade pip and dependencies.
- 
-# SSH
-
-    solv-ssh-client   : Configure the logged-in user's SSH client.
-    solv-ssh-hints    : Recall how to do some things with SSH.
-    solv-ssh-server   : Configure the SSH server.
- 
- 
+### 
+### === SOLV ===
+### 
+### Got a problem? Put some solvahol on it!
+### 
+### Run these scripts to bootstrap common configurations.
+### 
+### # Git
+### 
+###     solv-gh           : Configure the logged-in user's GitHub CLI, gh.
+###     solv-git          : Configure the logged-in user's Git client.
+###  
+### # Python
+### 
+###     solv-python       : Install and upgrade pip and dependencies.
+###  
+### # SSH
+### 
+###     solv-ssh-client   : Configure the logged-in user's SSH client.
+###     solv-ssh-hints    : Recall how to do some things with SSH.
+###     solv-ssh-server   : Configure the SSH server.
+### 
+### 
