@@ -47,7 +47,7 @@ jobs:
 
       - name: Push image(s) to ghcr.io
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | \
+          echo "${{ secrets.PAT }}" | \
           docker login ghcr.io \
           -u ${{ github.actor }} --password-stdin
           echo "::debug::_images is ..." && cat _images
