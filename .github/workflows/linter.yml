@@ -31,8 +31,9 @@ jobs:
 
       # Run Linter against code base
       - name: Lint Code Base
-        uses: docker://ghcr.io/github/super-linter:v3.13.1
+        uses: github/super-linter@v3
         env:
           VALIDATE_ALL_CODEBASE: false
+          VALIDATE_DOCKERFILE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
