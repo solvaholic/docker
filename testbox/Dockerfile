@@ -1,9 +1,6 @@
 #
 # Usage examples:
 #
-#   # Run ./script/test on the current checkout.
-#   docker run -t --rm -v $(realpath .):/myrepo:ro solvaholic/testbox:latest
-#
 #   # Get a disposable shell.
 #   docker run -t --rm solvaholic/testbox:latest /bin/bash
 #
@@ -11,10 +8,6 @@
 #   docker run -t --rm solvaholic/testbox:latest /help
 #
 
-#
-# Hi there future reader! @solvaholic put this Docker image together in an
-# attempt to find a way 'round (spending time) installing yamllint and other
-# packages every test run, on a GitHub Actions workflow runner.
 #
 # If you have any feedback at all, please share it!
 # https://github.com/solvaholic/docker/issues/new/choose
@@ -24,61 +17,60 @@
 
 # Build donor image, to copy some things over rather than install in-place.
 FROM debian:buster AS donor
-RUN apt update && apt install -y locales
 
-# Build and set locale.
-# (Copy /usr/lib/locale/en_US.UTF-8 to desired target.)
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y locales && \
+    rm -rf /var/lib/apt/lists/*
+
+# Build and set locale
+# (Generate /usr/lib/locale/en_US.UTF-8 for testbox target)
+WORKDIR /tmp
 RUN cp /usr/share/i18n/charmaps/UTF-8.gz /tmp && \
-    cd /tmp && rm -rf /tmp/UTF-8 && \
+    rm -rf /tmp/UTF-8 && \
     gzip -d UTF-8.gz && \
     localedef -f /tmp/UTF-8 -i /usr/share/i18n/locales/en_US \
     /usr/lib/locale/en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
 
-
-# Build testbox image.
+# Build testbox image
 FROM debian:buster AS testbox
+ENV GH_VERSION=1.4.0
 
-# Set ENTRYPOINT and CMD to run /entrypoint.sh by default.
+# Set ENTRYPOINT and CMD to run /entrypoint.sh by default
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "--"]
 CMD ["/entrypoint.sh"]
 
-# NOTE: Removing a package from this list :point_down: will be a breaking
-#       change. Before you head down that path, start versioning this image.
+# Install prerequisite packages
+# hadolint ignore=DL3008,DL3009
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        curl \
+        git \
+        man \
+        nvi \
+        shellcheck \
+        sudo \
+        tmux
 
-# Install prerequisite packages.
-RUN apt update && apt install -y \
-curl \
-git \
-man \
-nvi \
-python3-pkg-resources \
-shellcheck \
-sudo \
-tmux \
-yamllint
-
-# TODO: Since that :point_up: effectively makes any project using this image
-#       dependent on those packages, find a more reliable way to manage this.
-
-# Install gh.
-ADD https://github.com/cli/cli/releases/download/v0.6.4/gh_0.6.4_linux_amd64.deb /
+# Install gh
+ADD https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.deb /
 RUN dpkg -i ./gh_*.deb && rm -f ./gh_*.deb
 
-# Add a couple non-root user accounts.
+# Add a couple non-root user accounts
 RUN useradd -c "" -m -p "" -s /bin/bash user1; \
     useradd -c "" -m -p "" -s /bin/bash user2; \
     useradd -c "" -m -p "" -s /bin/bash user3;
 
-# Set locale, so text encoding and decoding can work reliably.
+# Set locale, so text encoding and decoding can work reliably
 RUN mkdir -p /usr/lib/locale/en_US.UTF-8
 COPY --from=donor /usr/lib/locale/en_US.UTF-8 /usr/lib/locale/en_US.UTF-8/
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Add helpful scripts.
-ADD vm_files /
+# Add helpful scripts
+COPY vm_files /
+
+USER user1
