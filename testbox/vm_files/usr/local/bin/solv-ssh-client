@@ -12,8 +12,9 @@
 #
 
 if [ "${1}" = "--all" ]; then
+  # Re-run solv-ssh-client as each user, including root
   for i in root $(ls /home); do
-    sudo -iu $i -- /usr/local/bin/solv-ssh-client
+    sudo -iu "$i" -- /usr/local/bin/solv-ssh-client
   done
 else
   echo " "

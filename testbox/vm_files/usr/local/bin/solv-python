@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Configure the logged-in user's Git client.
+# Install python3 and pip.
 #
 # Usage: /usr/local/bin/solv-python
 #

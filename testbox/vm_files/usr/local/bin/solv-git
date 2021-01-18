@@ -12,12 +12,13 @@
 #
 
 if [ "${1}" = "--all" ]; then
+  # Re-run solv-git as each user, including root
   for i in root $(ls /home); do
-    sudo -iu $i -- /usr/local/bin/solv-git
+    sudo -iu "$i" -- /usr/local/bin/solv-git
   done
 else
   echo " "
-  echo "INFO: Run solv-git-client for user $(id -un)."
+  echo "INFO: Run solv-git for user $(id -un)."
   git config --global user.name "$(id -un)"
   git config --global user.email "$(id -un)@$(hostname)"
 fi
