@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Configure the logged-in user's GitHub CLI, gh.
+#
+# Usage examples:
+#
+#   GITHUB_USER=USERNAME GITHUB_TOKEN=TOKEN /usr/local/bin/solv-gh
+#
+
+_ghcfg=~/.config/gh/config.yml
+
+echo " "
+
+[ -z "${GITHUB_TOKEN}" ] && GITHUB_TOKEN="${INPUT_GITHUB_TOKEN:-""}"
+[ -z "${GITHUB_USER}" ] && GITHUB_USER="${INPUT_GITHUB_USER:-""}"
+
+if [ -z "${GITHUB_USER}" ] || [ -z "${GITHUB_TOKEN}" ]; then
+  echo "FAIL: Please specify both GITHUB_USER and GITHUB_TOKEN."
+  exit 1
+fi
+
+if [ -e "${_ghcfg}" ]; then
+  echo "INFO: ${_ghcfg} alread existed; Renamed it to ${_ghcfg}.bak."
+  mv "${_ghcfg}" "${_ghcfg}.bak"
+fi
+
+echo "INFO: GITHUB_USER is set to '${GITHUB_USER}'."
+echo "INFO: GITHUB_TOKEN is set, too. Configuring gh."
+mkdir -p "$(dirname "${_ghcfg}")"
+echo "github.com:" > "${_ghcfg}"
+echo "- user: ${GITHUB_USER}" >> "${_ghcfg}"
+echo "  oauth_token: ${GITHUB_TOKEN}" >> "${_ghcfg}"
+echo "INFO: Created ${_ghcfg}."
+
+echo " "
