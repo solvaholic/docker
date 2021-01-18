@@ -2,9 +2,9 @@ name: Docker
 
 on:
   push:
-    # Only run this workflow if */Dockerfile in master branch changed.
+    # Run this workflow if */Dockerfile in main branch changed.
     branches:
-      - master
+      - main
     paths:
       - '*/Dockerfile'
       - '.github/workflows/dockerpush.yml'
@@ -21,12 +21,16 @@ jobs:
           fetch-depth: '2'
 
       - name: List changed Dockerfiles
+        # When a filename ending with /Dockerfile' has changed,
+        # append it to a file named _files
         run: |
           git diff --name-only ${{ github.event.before }} \
           ${{ github.event.after }} | \
           sed -n -e "/\/Dockerfile$/p" > _files
 
       - name: Build image(s)
+        # Get app name from parent dir, and build each Dockerfile:
+        #   <repo-owner>/<app-name>:latest
         run: |
           echo "::debug::_files is ..." && cat _files
           : > _images
@@ -35,22 +39,21 @@ jobs:
             echo "::debug::_thisfile, _appname are ..." && \
             echo "${_thisfile} ${_appname}"
             if [ -f "${_thisfile}" ]; then
-              _tag=${{ github.repository }}/"${_appname}":latest
+              _tag=${{ github.repository_owner }}/"${_appname}":latest
               tar c -C "${_appname}" . | docker build -t "${_tag}" -
               echo "${_tag}" >> _images
             fi
           done
-          echo "::set-env name=_images::${_myImages}"
 
-      - name: Push image(s) to docker.pkg.github.com
+      - name: Push image(s) to ghcr.io
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
-          docker login docker.pkg.github.com \
+          docker login ghcr.io \
           -u ${{ github.actor }} --password-stdin
           echo "::debug::_images is ..." && cat _images
           cat _images | while read -r _thisimage; do
-            # For GitHub's registry, prepend docker.pkg.github.com
-            _mytag="docker.pkg.github.com/${_thisimage}"
+            # For GitHub's registry, prepend ghcr.io
+            _mytag="ghcr.io/${_thisimage}"
             docker tag "${_thisimage}" "${_mytag}"
             echo "::debug::Pushing ${_mytag}"
             docker push "${_mytag}"
