@@ -18,9 +18,9 @@ on:
     inputs:
       # User inputs the release version, for example `1.2.3`
       version:
-        description: 'Release version to create, for example 1.2.3'
+        description: 'Image to build, for example testbox'
         required: true
-        default: "2.1.3"
+        default: "testbox"
 
 jobs:
   # Build and push any Dockerfile changed in this push.
@@ -28,11 +28,9 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      fullref: ${{ steps.gettagver.outputs.fullref }}
-      shortref: ${{ steps.gettagver.outputs.shortref }}
-      sharef: ${{ steps.gettagver.outputs.sharef }}
-      tagbuilt: ${{ steps.buildimage.outputs.tagbuilt }}
-      tagpushed: ${{ steps.pushimage.outputs.tagpushed }}
+      sharef: ${{ steps.getver.outputs.sharef }}
+      buildfiles: ${{ steps.listfiles.outputs.buildfiles }}
+      images: ${{ steps.buildimage.outputs.images }}
 
     steps:
       - uses: actions/checkout@v2
@@ -42,74 +40,76 @@ jobs:
 
       - name: Get version details
         # TODO: Re-ID me
-        id: gettagver
+        id: getver
         run: |
-          _full_ref="${{ github.ref }}"
-          _short_ref=
-          _sha_ref="${{ github.sha }}"     # TODO: Use only one?
-          _sha_short="${{ github.sha }}"
-          if [[ "${_full_ref}" == "refs/heads/"* ]]; then
-            _short_ref=${_full_ref#refs/heads/}
-          elif [[ "${_full_ref}" == "refs/tags/"* ]]; then
-            _short_ref=${_full_ref#refs/tags/}
-          else
-            echo "FAIL: Did not recognize GITHUB_REF '${_full_ref}'."
-            exit 1
-          fi
-          echo "Set fullref to '${_full_ref}'."
-          echo "Set shortref to '${_short_ref}'."
+          _sha_ref="${{ github.sha }}"
           echo "Set sharef to '${_sha_ref}'."
-          echo "::set-output name=fullref::${_full_ref}"
-          echo "::set-output name=shortref::${_short_ref}"
           echo "::set-output name=sharef::${_sha_ref}"
 
       - name: List Dockerfiles to build
+        id: listfiles
         # When a filename ending with /Dockerfile' has changed,
         # append it to a file named _files
         run: |
-          git diff --name-only ${{ github.event.before }} \
-          ${{ github.event.after }} | \
-          sed -n -e "/\/Dockerfile$/p" > _files
+          _files=
+          _diff="$(git diff --name-only ${{ github.event.before }} \
+            ${{ github.event.after }})"
+          for _file in ${_diff}; do
+            if [ -r "${_file}" ]; then _files="${_files} ${_file}"; fi
+          done
+          if [ -z "${_files}" ]; then
+            echo "Found zero changed Dockerfiles."
+            exit 1
+          else
+            echo "::set-output name=buildfiles::${_files}"
+          fi
 
       - name: Build image(s)
+        id: buildimage
         # Get app name from parent dir, and build each Dockerfile:
         #   <repo-owner>/<app-name>:latest
         run: |
-          _image_ver="${{ steps.gettagver.outputs.sharef }}"
+          _image_ver="${{ steps.getver.outputs.sharef }}"
+          _files="${{ steps.listfiles.outputs.buildfiles }}"
+          _images=
 
-          echo "::debug::_files is ..." && cat _files
-          : > _images
-          cat _files | while read -r _thisfile; do
+          echo "::debug::_files is ..." && echo ${_files}
+
+          for _thisfile in ${_files}; do
             _appname="${_thisfile%%/*}" _filename="${_thisfile##*/}"
             echo "::debug::_thisfile, _appname are ..." && \
-            echo "${_thisfile} ${_appname}"
+              echo "${_thisfile} ${_appname}"
+
             if [ -f "${_thisfile}" ]; then
               _tag=${{ github.repository_owner }}/"${_appname}":latest
-              tar c -C "${_appname}" . | docker build -t "${_tag}" -
-              echo "${_tag}" >> _images
+              tar c -C "${_appname}" . | docker build \
+                --build-arg image_version="${_image_ver}" \
+                --quiet \
+                --tag "${_tag}" \
+                - || exit
+              echo "Built '${_image_tag}' OK."
+              _images="${_images} ${_image_tag}"
+            fi
+
+            if [ -z "${_images}" ]; then
+              echo "Failed to build any Dockerfiles."
+              exit 1
+            else
+              echo "::set-output name=images::${_images}"
             fi
           done
 
-
-
-          if docker build . -q \
-            --build-arg image_version="${_image_ver}" \
-            -t "${_image_tag}"; then
-            echo "Built '${_image_tag}' OK."
-          else
-            echo "FAIL: Failed to build '${_image_tag}'."
-            exit 1
-          fi
-
-
-
       - name: Push image(s) to ghcr.io
         run: |
+          _images="${{ steps.buildimage.outputs.images }}"
+
           echo "${{ secrets.PAT }}" | \
           docker login ghcr.io \
-          -u ${{ github.actor }} --password-stdin
+            -u ${{ github.actor }} --password-stdin
+
           echo "::debug::_images is ..." && cat _images
-          cat _images | while read -r _thisimage; do
+
+          for _thisimage in ${_images}; do
             # For GitHub's registry, prepend ghcr.io
             _mytag="ghcr.io/${_thisimage}"
             docker tag "${_thisimage}" "${_mytag}"
@@ -119,13 +119,14 @@ jobs:
 
       - name: Push image(s) to Docker hub
         run: |
+          _images="${{ steps.buildimage.outputs.images }}"
+
           echo "${{ secrets.dockerhub_token }}" | \
           docker login -u ${{ github.actor }} --password-stdin
+
           echo "::debug::_images is ..." && cat _images
-          cat _images | while read -r _thisimage; do
-            # For Docker hub, use only the owner and topic names.
-            _mytag="${_thisimage%%/*}/${_thisimage##*/}"
-            docker tag "${_thisimage}" "${_mytag}"
-            echo "::debug::Pushing ${_mytag}"
-            docker push "${_mytag}"
+
+          for _thisimage in ${_images}; do
+            echo "::debug::Pushing ${_thisimage}"
+            docker push "${_thisimage}"
           done
