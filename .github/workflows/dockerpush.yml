@@ -54,6 +54,10 @@ jobs:
           _files=
           _diff="$(git diff --name-only ${{ github.event.before }} \
             ${{ github.event.after }})"
+          if [ "${{ github.event }}" = "workflow_dispatch" ]; then
+            # TODO: Handle workflow_dispatch trigger!
+            _diff=" testbox/Dockerfile"
+          fi
           for _file in ${_diff}; do
             if [ -r "${_file}" ]; then _files="${_files} ${_file}"; fi
           done
