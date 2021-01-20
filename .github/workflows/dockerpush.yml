@@ -111,8 +111,6 @@ jobs:
           docker login ghcr.io \
             -u ${{ github.actor }} --password-stdin
 
-          echo "::debug::_images is ..." && cat _images
-
           for _thisimage in ${_images}; do
             # For GitHub's registry, prepend ghcr.io
             _mytag="ghcr.io/${_thisimage}"
@@ -127,8 +125,6 @@ jobs:
 
           echo "${{ secrets.dockerhub_token }}" | \
           docker login -u ${{ github.actor }} --password-stdin
-
-          echo "::debug::_images is ..." && cat _images
 
           for _thisimage in ${_images}; do
             echo "::debug::Pushing ${_thisimage}"
