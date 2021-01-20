@@ -6,7 +6,8 @@ FROM debian:stretch-slim
 ENV _rel="v2.165.2" _file="actions-runner-linux-x64-2.165.2.tar.gz"
 
 # Install prerequisite packages:
-RUN apt update && apt install -y curl
+# hadolint ignore=DL3008,DL3009,DL3015
+RUN apt-get update && apt-get install -y curl
 
 # Create service user and working directory:
 RUN useradd -c "" -m -p "" -s /bin/bash runner \

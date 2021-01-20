@@ -16,8 +16,8 @@ on:
   # Run when manually triggered
   workflow_dispatch:
     inputs:
-      # User inputs the release version, for example `1.2.3`
-      version:
+      # User inputs the image to build, for example testbox
+      appname:
         description: 'Image to build, for example testbox'
         required: true
         default: "testbox"
@@ -52,11 +52,12 @@ jobs:
         # append it to a file named _files
         run: |
           _files=
-          _diff="$(git diff --name-only ${{ github.event.before }} \
-            ${{ github.event.after }})"
           if [ "${{ github.event }}" = "workflow_dispatch" ]; then
-            # TODO: Handle workflow_dispatch trigger!
-            _diff=" testbox/Dockerfile"
+            _appname="${{ github.event.inputs.appname }}"
+            _diff="${_appname}/Dockerfile"
+          else
+            _diff="$(git diff --name-only ${{ github.event.before }} \
+            ${{ github.event.after }})"
           fi
           for _file in ${_diff}; do
             if [ -r "${_file}" ]; then _files="${_files} ${_file}"; fi
@@ -70,7 +71,7 @@ jobs:
 
       - name: Build image(s)
         id: buildimage
-        # Get app name from parent dir, and build each Dockerfile:
+        # Get app name from parent dir, and build each tag:
         #   <repo-owner>/<app-name>:latest
         run: |
           _image_ver="${{ steps.getver.outputs.sharef }}"
