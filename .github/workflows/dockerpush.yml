@@ -52,16 +52,17 @@ jobs:
         # append it to a file named _files
         run: |
           _files=
-          if [ "${{ github.event }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             _appname="${{ github.event.inputs.appname }}"
             _diff="${_appname}/Dockerfile"
           else
             _diff="$(git diff --name-only ${{ github.event.before }} \
-            ${{ github.event.after }})"
+              ${{ github.event.after }} | sed -n "/\/Dockerfile$/p" )"
           fi
           for _file in ${_diff}; do
             if [ -r "${_file}" ]; then _files="${_files} ${_file}"; fi
           done
+          echo "::debug::_files is ..." && echo ${_files}
           if [ -z "${_files}" ]; then
             echo "Found zero changed Dockerfiles."
             exit 1
@@ -77,8 +78,6 @@ jobs:
           _image_ver="${{ steps.getver.outputs.sharef }}"
           _files="${{ steps.listfiles.outputs.buildfiles }}"
           _images=
-
-          echo "::debug::_files is ..." && echo ${_files}
 
           for _thisfile in ${_files}; do
             _appname="${_thisfile%%/*}" _filename="${_thisfile##*/}"
