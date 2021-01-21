@@ -34,7 +34,12 @@ RUN cp /usr/share/i18n/charmaps/UTF-8.gz /tmp && \
 
 # Build testbox image
 FROM debian:buster AS testbox
+ARG image_version
 ENV GH_VERSION=1.4.0
+
+LABEL name="solvaholic/testbox" \
+      version="${image_version}" \
+      maintainer="solvaholic on GitHub"
 
 # Set ENTRYPOINT and CMD to run /entrypoint.sh by default
 COPY entrypoint.sh /entrypoint.sh
@@ -49,6 +54,7 @@ RUN apt-get update && \
         curl \
         git \
         man \
+        ncat \
         nvi \
         shellcheck \
         sudo \
