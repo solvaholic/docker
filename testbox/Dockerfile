@@ -41,9 +41,6 @@ LABEL name="solvaholic/testbox" \
       version="${image_version}" \
       maintainer="solvaholic on GitHub"
 
-# Set ENTRYPOINT and CMD to run /entrypoint.sh by default
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod 755 /entrypoint.sh
 ENTRYPOINT ["/bin/bash", "-c", "--"]
 CMD ["/entrypoint.sh"]
 
