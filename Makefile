@@ -5,7 +5,7 @@ NAME ?= unknown
 IMAGE ?= solvaholic/${NAME}
 IMAGE_VER ?= local
 IMAGE_TAG ?= ${IMAGE}:${IMAGE_VER}
-SRCDIR ?= .
+SRCDIR ?= ${PWD}
 
 _U ?= user1
 
