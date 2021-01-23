@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
 
+# Provide default values for variables
 SHELL ?= /bin/bash
 NAME ?= unknown
 IMAGE ?= solvaholic/${NAME}
@@ -7,13 +8,14 @@ IMAGE_VER ?= local
 IMAGE_TAG ?= ${IMAGE}:${IMAGE_VER}
 SRCDIR ?= ${PWD}
 
-_U ?= user1
+# Set $_U to override the image's default user, for example:
+# 	make container-shell _U=root
 
+# Parameters for Docker commands
 PNAME = --name ${NAME}
-PUSER = --user ${_U}
-PEXEC = --entrypoint ${SHELL}
-PIDLE = --entrypoint /idle.sh
+PUSER = $(if ${_U},--user ${_U},)
 
+# Recipes
 lint-dockerfile-lint:
 	@echo "Checking container image policies..."
 	@docker run --rm -it -v $(PWD):/root/ \
@@ -42,12 +44,12 @@ docker-build:
 container-shell:
 	@echo "Running interactive ${NAME} shell..."
 	@docker exec -it ${PUSER} ${NAME} ${SHELL} 2>/dev/null || \
-		docker run -it --rm ${PNAME} ${PUSER} ${PEXEC} ${IMAGE_TAG}
+		docker run -it --rm ${PNAME} ${PUSER} ${IMAGE_TAG}
 	@echo "Interactive ${NAME} shell finished!"
 
 container-start:
 	@echo "Starting detached ${NAME} container..."
-	@docker run -dt --rm ${PNAME} ${PIDLE} ${IMAGE_TAG}
+	@docker run -dt --rm ${PNAME} ${PUSER} ${IMAGE_TAG}
 	@echo "Detached ${NAME} container started!"
 	@docker ps
 
