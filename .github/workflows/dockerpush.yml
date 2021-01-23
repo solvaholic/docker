@@ -7,11 +7,13 @@ name: Docker
 
 on:
   push:
-    # Run this workflow if */Dockerfile in main branch changed.
+    # Run this workflow if build files in main branch changed.
     branches:
       - main
     paths:
       - '*/Dockerfile'
+      - '*/entrypoint.sh'
+      - '*/vm_files/*'
 
   # Run when manually triggered
   workflow_dispatch:
