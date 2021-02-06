@@ -39,7 +39,8 @@ ENV GH_VERSION=1.4.0
 
 LABEL name="solvaholic/testbox" \
       version="${image_version}" \
-      maintainer="solvaholic on GitHub"
+      maintainer="solvaholic on GitHub" \
+      org.opencontainers.image.source="https://github.com/solvaholic/docker/blob/${image_version}/testbox/Dockerfile"
 
 ENTRYPOINT ["/bin/bash", "-c", "--"]
 CMD ["/entrypoint.sh"]

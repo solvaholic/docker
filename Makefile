@@ -62,6 +62,8 @@ container-stop:
 inspect-labels:
 	@echo "Inspecting image labels..."
 	@docker inspect --format \
+		" Image Source: {{ index .Config.Labels \"org.opencontainers.image.source\" }}" ${IMAGE_TAG}
+	@docker inspect --format \
 		" Name: {{ index .Config.Labels \"name\" }}" ${IMAGE_TAG}
 	@docker inspect --format \
 		" Version: {{ index .Config.Labels \"version\" }}" ${IMAGE_TAG}
