@@ -49,12 +49,14 @@ CMD ["/entrypoint.sh"]
 # hadolint ignore=DL3008,DL3009
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
+        ca-certificates \
         curl \
         git \
         man \
         ncat \
         nvi \
         shellcheck \
+        ssh-client \
         sudo \
         tmux
 
